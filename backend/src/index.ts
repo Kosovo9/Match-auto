@@ -84,6 +84,26 @@ app.get('/api/chat/ws/:roomId', async (c) => {
     return obj.fetch(c.req.raw)
 })
 
+import { honeypotTrap } from './services/secret/Honeypot'
+
+// ... (existing imports)
+
+// Honeypot Traps for Scrapers
+app.get('/wp-admin', honeypotTrap)
+app.get('/.env', honeypotTrap)
+app.get('/config.php', honeypotTrap)
+
+// Pulse & Heatmap endpoints
+app.get('/api/secret/pulse', async (c) => {
+    const { PulseEngine } = await import('./services/secret/Pulse')
+    return c.json(await PulseEngine.getGlobalEvents(c.env))
+})
+
+app.get('/api/secret/heatmap', async (c) => {
+    const { HeatmapGenerator } = await import('./services/secret/Heatmap')
+    return c.json(await HeatmapGenerator.getHeatEntries(c.env))
+})
+
 // Standard Routes
 app.route('/listings', listings)
 app.route('/viral', viral)
