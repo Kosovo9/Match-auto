@@ -105,8 +105,28 @@ app.get('/api/secret/heatmap', async (c) => {
 })
 
 import { GhostNegotiator } from './services/secret/GhostNegotiator'
+import { HyperCrawler } from './services/secret/HyperCrawler'
+import { DopamineEngine } from './services/secret/DopamineEngine'
 
-// ... (existing secret endpoints)
+// Antigravity 20x Hyper-Crawler
+app.post('/api/secret/crawl', async (c) => {
+    const result = await HyperCrawler.initiateGlobalCrawl(c.env)
+    return c.json(result)
+})
+
+// Antigravity 20x Dopamine Feed
+app.get('/api/secret/feed', async (c) => {
+    const userId = c.req.query('userId') || 'anon'
+    const feed = await DopamineEngine.getDopamineFeed(userId, {})
+    return c.json({
+        success: true,
+        data: feed,
+        meta: {
+            algorithm: 'Antigravity-Dopamine-v2',
+            optimization: '20x real'
+        }
+    })
+})
 
 // Test Negotiation Endpoint
 app.post('/api/test/negotiate', async (c) => {
