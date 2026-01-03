@@ -72,23 +72,43 @@ export const sentinelMiddleware = async (c: Context, next: Next) => {
     if (analysis.isThreat) {
         sentinel.blockThreat()
 
+        // Log threat to KV for God View Dashboard
+        const ip = c.req.header('x-forwarded-for') || 'unknown'
+        const threatLog = {
+            timestamp: Date.now(),
+            ip,
+            reason: analysis.reason,
+            level: analysis.threatLevel,
+            path: c.req.path
+        }
+
+        // Push threat log to KV (placeholder for VIRAL_DATA or real THREAT_DATA KV)
+        if (c.env?.VIRAL_DATA) {
+            const currentThreats = await c.env.VIRAL_DATA.get('threat_logs') || '[]'
+            const logs = JSON.parse(currentThreats)
+            logs.unshift(threatLog)
+            await c.env.VIRAL_DATA.put('threat_logs', JSON.stringify(logs.slice(0, 50)))
+        }
+
         // Respuesta engañosa para scrapers
         if (analysis.threatLevel === 'high') {
             return c.json({
-                error: 'Service temporarily unavailable',
-                code: 503
-            }, 503)
+                error: 'Security Breach Detected - IP Blacklisted',
+                code: 403,
+                sentinel_id: crypto.randomUUID()
+            }, 403)
         }
 
         // Rate limiting silencioso para amenazas medias
         await new Promise(resolve => setTimeout(resolve, 2000))
     }
 
-    // Headers de seguridad
+    // Headers de seguridad NASA
     c.header('X-Content-Type-Options', 'nosniff')
     c.header('X-Frame-Options', 'DENY')
     c.header('X-XSS-Protection', '1; mode=block')
     c.header('X-Sentinel-Status', analysis.isThreat ? 'blocked' : 'clean')
+    c.header('X-Match-Auto-Speed', '10x')
 
     await next()
 }
