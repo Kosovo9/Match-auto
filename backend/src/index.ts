@@ -168,7 +168,19 @@ app.post('/api/test/negotiate', async (c) => {
     })
 })
 
-// Standard Routes
+import b2b from './routes/b2b'
+import { OnChainReputation } from './services/secret/GlobalIntelligence'
+
+// ... (existing secret endpoints)
+
+// Empire Intelligence Endpoints
+app.get('/api/secret/reputation/:userId', async (c) => {
+    const userId = c.req.param('userId')
+    return c.json(await OnChainReputation.getUserReputation(userId, c.env))
+})
+
+// Standard & B2B Routes
+app.route('/api/b2b', b2b)
 app.route('/listings', listings)
 app.route('/viral', viral)
 
