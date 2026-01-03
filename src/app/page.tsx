@@ -2,6 +2,7 @@ import { ViralDashboard } from '@/components/features/admin/ViralDashboard';
 import { SecurityPanel } from '@/components/features/admin/SecurityPanel';
 import { ImpactTracker } from '@/components/features/social/ImpactTracker';
 import { AffiliateDashboard } from '@/components/features/admin/AffiliateDashboard';
+import { NegotiationTester } from '@/components/features/admin/NegotiationTester';
 import { ARVehicleInspector } from '@/features/05_experience/ar-vehicle-inspector';
 
 export default function HomePage() {
@@ -24,7 +25,8 @@ export default function HomePage() {
 
             <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <section className="space-y-6">
-                    <h2 className="text-2xl font-bold text-white uppercase tracking-widest border-l-4 border-nasa-blue pl-4">Misión & Impacto</h2>
+                    <h2 className="text-2xl font-bold text-white uppercase tracking-widest border-l-4 border-nasa-blue pl-4">Laboratorio & Misión</h2>
+                    <NegotiationTester />
                     <ImpactTracker />
                     <AffiliateDashboard />
                 </section>

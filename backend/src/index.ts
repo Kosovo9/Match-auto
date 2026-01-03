@@ -104,6 +104,30 @@ app.get('/api/secret/heatmap', async (c) => {
     return c.json(await HeatmapGenerator.getHeatEntries(c.env))
 })
 
+import { GhostNegotiator } from './services/secret/GhostNegotiator'
+
+// ... (existing secret endpoints)
+
+// Test Negotiation Endpoint
+app.post('/api/test/negotiate', async (c) => {
+    const { offer, askingPrice } = await c.req.json()
+    const result = GhostNegotiator.shouldFilter(offer, askingPrice)
+
+    if (result.shouldReject) {
+        return c.json({
+            success: false,
+            message: result.aiResponse,
+            status: 'BLOCKED_BY_GHOST'
+        }, 403)
+    }
+
+    return c.json({
+        success: true,
+        message: 'Oferta enviada al vendedor exitosamente.',
+        status: 'ACCEPTED'
+    })
+})
+
 // Standard Routes
 app.route('/listings', listings)
 app.route('/viral', viral)
