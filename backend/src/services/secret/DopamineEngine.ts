@@ -25,7 +25,8 @@ export class DopamineEngine {
         return scoredFeed.slice(0, 20);
     }
 
-    static async getIrresistibleNotification(userId: string) {
+    static async getIrresistibleNotification(userId: string, userPrefs: any = { optIn: true }) {
+        if (!userPrefs.optIn) return null;
         const notifications = [
             {
                 title: "🔥 ¡ALERTA DE OPORTUNIDAD!",

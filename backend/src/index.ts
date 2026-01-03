@@ -111,7 +111,7 @@ import { DopamineEngine } from './services/secret/DopamineEngine'
 // Antigravity 20x Hyper-Crawler (Turbo Mode)
 app.post('/api/secret/crawl', async (c) => {
     const { isTurbo } = await c.req.json().catch(() => ({ isTurbo: false }))
-    const result = await HyperCrawler.initiateGlobalCrawl(c.env, isTurbo)
+    const result = await HyperCrawler.enqueueCrawl(c.env, isTurbo)
     return c.json(result)
 })
 
@@ -132,10 +132,13 @@ import { AntigravityCryptoWallet } from './services/secret/CryptoWallet'
 
 // Antigravity Crypto-Wallet Routes
 app.post('/api/secret/crypto/withdraw', async (c) => {
-    const { address, amount } = await c.req.json()
+    const { address, amount, securityToken } = await c.req.json()
+    if (securityToken !== 'BUNKER_SECURE_AUTH_TOKEN') {
+        return c.json({ error: 'Security Breach Attempt Blocked by Sentinel X' }, 403)
+    }
     const wallet = new AntigravityCryptoWallet()
     const txId = await wallet.processCommissionWithdrawal(address, amount)
-    return c.json({ success: true, txId, message: 'Pago distribuido en la red Solana' })
+    return c.json({ success: true, txId, message: 'Pago distribuido de forma segura en Solana' })
 })
 
 app.get('/api/secret/crypto/balance', async (c) => {
