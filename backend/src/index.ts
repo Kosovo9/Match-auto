@@ -26,6 +26,10 @@ import listings from './routes/listings'
 import viral from './routes/viral'
 import b2b from './routes/b2b'
 
+// Admiral & Auction System
+import { getRegionalConfig } from './services/ads/config'
+import { AuctionEngine } from './auctions/engine'
+
 // Secret & Specialized Services
 import { PulseEngine } from './services/secret/Pulse'
 import { HeatmapGenerator } from './services/secret/Heatmap'
@@ -83,6 +87,20 @@ app.use('*', logger())
 app.use('*', compression())
 app.use('*', rateLimit(rateLimitConfigs.moderate))
 app.use('*', sentinelMiddleware)
+
+const auctionEngine = new AuctionEngine()
+
+// 1.1 Admiral Global Config & Tracing Middleware
+app.use('*', async (c, next) => {
+    // Inject Regional Config based on CF Country
+    const config = getRegionalConfig(c);
+    c.set('regionalConfig' as any, config);
+
+    // Set headers for frontend detection
+    c.header('X-Match-Auto-Region', config.country || 'unknown');
+
+    await next();
+});
 
 // 2. Systems Initializers
 const cache = new EdgeCacheSupercharger()
@@ -184,6 +202,26 @@ secret.get('/crypto/balance', async (c) => {
 })
 
 app.route('/api/secret', secret)
+
+// --- Admiral Admiral Control Center API ---
+const admiral = new Hono<{ Bindings: Env }>()
+admiral.use('*', protectRoute)
+
+admiral.get('/config', (c) => c.json({ success: true, data: c.get('regionalConfig' as any) }))
+
+admiral.post('/ads/promote', async (c) => {
+    const { listingId, tier } = await c.req.json()
+    // Validation would happen here
+    return c.json({ success: true, message: `Listing ${listingId} promoted to ${tier}`, status: 'AD_ACTIVE' })
+})
+
+admiral.post('/auctions/create', async (c) => {
+    const { listingId, sellerId } = await c.req.json()
+    const result = await auctionEngine.createAuction(listingId, sellerId)
+    return c.json(result)
+})
+
+app.route('/api/admiral', admiral)
 
 // Negotiation (Test/Semi-Public)
 app.post('/api/test/negotiate', async (c) => {
