@@ -7,8 +7,8 @@ import {
     Globe, Shield, Zap, Bell, MessageSquare,
     BarChart3, Settings, Wallet, Sparkles
 } from 'lucide-react'
-import { SignInButton, UserButton, useUser } from '@clerk/nextjs'
 import { motion, AnimatePresence } from 'framer-motion'
+import { signIn, signOut, useSession } from 'next-auth/react'
 
 const navItems = [
     { label: 'Marketplace', href: '/marketplace', icon: Globe },
@@ -16,16 +16,19 @@ const navItems = [
     { label: 'Escrow', href: '/escrow', icon: Shield },
     { label: 'AI Analysis', href: '/ai', icon: Zap },
     { label: 'Dashboard', href: '/dashboard', icon: BarChart3 },
+    { label: 'Messages', href: '/messages', icon: MessageSquare },
+    { label: 'Wallet', href: '/wallet', icon: Wallet },
 ]
 
 const quickActions = [
     { label: 'Sell Parts', href: '/listings/create', color: 'from-green-500 to-emerald-600' },
     { label: 'Buy Now', href: '/marketplace', color: 'from-blue-500 to-cyan-600' },
+    { label: 'Live Auction', href: '/auctions', color: 'from-purple-500 to-pink-600' },
 ]
 
 export function Navigation() {
     const [isOpen, setIsOpen] = useState(false)
-    const { isSignedIn } = useUser()
+    const { data: session } = useSession()
 
     return (
         <nav className="sticky top-0 z-50 border-b border-white/10 bg-gray-950/80 backdrop-blur-xl">
@@ -62,6 +65,19 @@ export function Navigation() {
                         ))}
                     </div>
 
+                    {/* Quick Actions */}
+                    <div className="hidden lg:flex items-center space-x-2">
+                        {quickActions.map((action) => (
+                            <Link
+                                key={action.label}
+                                href={action.href}
+                                className={`px-4 py-2 rounded-lg bg-gradient-to-r ${action.color} text-white font-medium hover:opacity-90 transition`}
+                            >
+                                {action.label}
+                            </Link>
+                        ))}
+                    </div>
+
                     {/* User Actions */}
                     <div className="flex items-center space-x-4">
                         <button className="p-2 rounded-lg hover:bg-white/5 transition">
@@ -75,9 +91,14 @@ export function Navigation() {
                             </span>
                         </button>
 
-                        {isSignedIn ? (
+                        {session ? (
                             <>
-                                <UserButton afterSignOutUrl="/" />
+                                <button
+                                    onClick={() => signOut()}
+                                    className="p-2 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600"
+                                >
+                                    <User className="w-5 h-5" />
+                                </button>
                                 <Link
                                     href="/dashboard"
                                     className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 transition"
@@ -86,12 +107,13 @@ export function Navigation() {
                                 </Link>
                             </>
                         ) : (
-                            <SignInButton mode="modal">
-                                <button className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 transition">
-                                    <User className="w-4 h-4" />
-                                    <span>Connect</span>
-                                </button>
-                            </SignInButton>
+                            <button
+                                onClick={() => signIn()}
+                                className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 transition"
+                            >
+                                <User className="w-4 h-4" />
+                                <span>Connect</span>
+                            </button>
                         )}
 
                         {/* Mobile menu button */}

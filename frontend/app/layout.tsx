@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Providers } from '@/components/providers'
+import { AuthProvider } from '@/providers/auth-provider'
 import { Navigation } from '@/components/navigation'
-import { Footer } from '@/components/footer'
+import { Footer } from '@/components/Footer'
 import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -21,7 +21,7 @@ export default function RootLayout({
     return (
         <html lang="en" className="dark">
             <body className={`${inter.className} bg-gray-950 text-white`}>
-                <Providers>
+                <AuthProvider>
                     <Navigation />
                     <main className="min-h-screen">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,7 +30,7 @@ export default function RootLayout({
                     </main>
                     <Footer />
                     <Toaster position="top-right" />
-                </Providers>
+                </AuthProvider>
             </body>
         </html>
     )
